@@ -66,6 +66,8 @@ public class CardController : MonoBehaviour
 
         // Flip up and notify GameManager
         FlipUp();
+        
+        GameManager.Instance.OnCardFlipped(this);
     }
 
     public void FlipUp()

@@ -15,8 +15,11 @@ public class GridManager : MonoBehaviour
 
     [Header("Grid Settings")]
     [SerializeField] private int totalColumns = 4;
-    [SerializeField] private int totalRows    = 4;
-
+    [SerializeField] private int totalRows = 4;
+    
+    public int TotalColumns => totalColumns;
+    public int TotalRows => totalRows;
+    
     [Header("Card Spacing")]
     [SerializeField] private float cardSpacing = 10f;
 
@@ -46,8 +49,8 @@ public class GridManager : MonoBehaviour
         yield return new WaitForEndOfFrame();
 
         GenerateGrid(totalColumns, totalRows);
+        GameManager.Instance.InitGame();
     }
-
     
     /// <summary>
     /// Call this to generate any grid layout
