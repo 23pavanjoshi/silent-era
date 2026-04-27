@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 
 public class GridManager : MonoBehaviour
@@ -36,6 +37,14 @@ public class GridManager : MonoBehaviour
 
     private void Start()
     {
+        StartCoroutine(InitGrid());
+    }
+
+    private IEnumerator InitGrid()
+    {
+        // Wait for canvas to fully calculate layout
+        yield return new WaitForEndOfFrame();
+
         GenerateGrid(totalColumns, totalRows);
     }
 
@@ -59,15 +68,16 @@ public class GridManager : MonoBehaviour
         totalColumns = columns;
         totalRows    = rows;
 
-        // Calculate card size based on board size
+        // Calculate correct card size
         Vector2 cardSize = CalculateCardSize(columns, rows);
 
         // Apply to Grid Layout Group
-        cardGrid.constraint          = GridLayoutGroup.Constraint.FixedColumnCount;
-        cardGrid.constraintCount     = columns;
-        cardGrid.cellSize            = cardSize;
-        cardGrid.spacing             = new Vector2(cardSpacing, cardSpacing);
-        cardGrid.childAlignment      = TextAnchor.MiddleCenter;
+        cardGrid.constraint      = GridLayoutGroup.Constraint.FixedColumnCount;
+        cardGrid.constraintCount = columns;
+        cardGrid.cellSize        = cardSize;
+        cardGrid.spacing         = new Vector2(cardSpacing, cardSpacing);
+        cardGrid.childAlignment  = TextAnchor.MiddleCenter;
+        cardGrid.padding         = new RectOffset(10, 10, 10, 10);
 
         // Generate paired card IDs and shuffle
         List<int> cardIDs = GenerateCardIDs(totalCards);
@@ -86,6 +96,9 @@ public class GridManager : MonoBehaviour
 
             allCards.Add(card);
         }
+
+        // Force layout rebuild after spawning
+        LayoutRebuilder.ForceRebuildLayoutImmediate(cardGrid.GetComponent<RectTransform>());
     }
 
     /// <summary>
@@ -105,16 +118,22 @@ public class GridManager : MonoBehaviour
         float boardWidth  = gameBoardRect.rect.width;
         float boardHeight = gameBoardRect.rect.height;
 
+        // Subtract padding (10 on each side)
+        float paddingX = 20f;
+        float paddingY = 20f;
+
         // Subtract total spacing
         float totalSpacingX = cardSpacing * (columns - 1);
         float totalSpacingY = cardSpacing * (rows - 1);
 
-        // Calculate card size
-        float cardWidth  = (boardWidth  - totalSpacingX) / columns;
-        float cardHeight = (boardHeight - totalSpacingY) / rows;
+        // Calculate available space per card
+        float cardWidth  = (boardWidth  - paddingX - totalSpacingX) / columns;
+        float cardHeight = (boardHeight - paddingY - totalSpacingY) / rows;
 
         // Use smaller value to keep cards square
         float cardSize = Mathf.Min(cardWidth, cardHeight);
+
+        Debug.Log($"Calculated Card Size: {cardSize} x {cardSize}");
 
         return new Vector2(cardSize, cardSize);
     }
