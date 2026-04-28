@@ -17,7 +17,6 @@ public class GameManager : MonoBehaviour
 
     private List<CardController> _flippedCards  = new List<CardController>();
     private List<CardController> _matchedCards  = new List<CardController>();
-    private bool _isCheckingMatch = false;
     private int _totalPairs = 0;
     private int _matchedPairs = 0;
 
@@ -130,8 +129,6 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private IEnumerator CheckMatch()
     {
-        _isCheckingMatch = true;
-
         // Grab the two cards
         CardController cardA = _flippedCards[0];
         CardController cardB = _flippedCards[1];
@@ -161,6 +158,9 @@ public class GameManager : MonoBehaviour
             // Notify ScoreManager
             ScoreManager.Instance.OnMatch();
             
+            // Play match sound
+            AudioManager.Instance.PlayMatch();
+            
             // Save after every match
             SaveManager.Instance.SaveGame();
             
@@ -174,9 +174,10 @@ public class GameManager : MonoBehaviour
             // Flip both cards back down
             cardA.FlipDown();
             cardB.FlipDown();
+            
+            // Play mismatch sound
+            AudioManager.Instance.PlayMismatch();
         }
-
-        _isCheckingMatch = false;
     }
 
     private void CheckGameOver()
@@ -187,6 +188,9 @@ public class GameManager : MonoBehaviour
 
             // Delete save data once game completed
             SaveManager.Instance.DeleteSave();
+            
+            // Play game over sound
+            AudioManager.Instance.PlayGameOver();
             
             Debug.Log("Game Over! All Pairs Matched!");
         }

@@ -77,6 +77,9 @@ public class CardController : MonoBehaviour
         // Flip up and notify GameManager
         FlipUp();
         
+        // Play flip sound
+        AudioManager.Instance.PlayFlip();
+        
         GameManager.Instance.OnCardFlipped(this);
     }
 
