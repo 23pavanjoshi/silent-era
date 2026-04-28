@@ -133,6 +133,7 @@ public class UIManager : MonoBehaviour
     public void OnHomeClicked()
     {
         GameManager.Instance.ResetGame();
+        ScoreManager.Instance.LoadHighScore();
     }
 
     private float EaseOutBack(float t)
