@@ -38,11 +38,6 @@ public class GameManager : MonoBehaviour
             Debug.Log("Save found! Loading...");
             LoadSavedGame();
         }
-        else
-        {
-            Debug.Log("No save! Fresh start...");
-            InitGame();
-        }
     }
     
     private void LoadSavedGame()
@@ -55,6 +50,11 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        UIManager.Instance.LoadSavedGame(data);
+    }
+
+    public void ResumeGameStart(SaveData data)
+    {
         GridManager.Instance.LoadFromSave(data);
     }
 
@@ -192,6 +192,9 @@ public class GameManager : MonoBehaviour
             // Play game over sound
             AudioManager.Instance.PlayGameOver();
             
+            // Show game over Screen
+            UIManager.Instance.ShowGameOver();
+            
             Debug.Log("Game Over! All Pairs Matched!");
         }
     }
@@ -217,6 +220,21 @@ public class GameManager : MonoBehaviour
         InitGame();
 
         Debug.Log("Game Restarted!");
+    }
+    
+    /// <summary>
+    /// Reset game
+    /// </summary>
+    public void ResetGame()
+    {
+        StopAllCoroutines();
+
+        // Delete save data on restart
+        SaveManager.Instance.DeleteSave();
+        
+        ScoreManager.Instance.ResetScore();
+
+        Debug.Log("Game Reset!");
     }
 
     public int GetMatchedPairs() => _matchedPairs;

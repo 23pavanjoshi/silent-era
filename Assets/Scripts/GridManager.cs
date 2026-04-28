@@ -42,6 +42,12 @@ public class GridManager : MonoBehaviour
     {
     }
 
+    public void UpdateGrid(int columns, int rows)
+    {
+        totalColumns = columns;
+        totalRows = rows;
+    }
+
     public void InitGrid()
     {
         GenerateGrid(totalColumns, totalRows);
