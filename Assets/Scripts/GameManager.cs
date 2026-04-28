@@ -94,6 +94,9 @@ public class GameManager : MonoBehaviour
         // Wait before checking
         yield return new WaitForSeconds(flipBackDelay);
 
+        // Notify ScoreManager
+        ScoreManager.Instance.OnTurnTaken();
+        
         if (cardA.CardID == cardB.CardID)
         {
             cardA.SetMatched();
@@ -105,6 +108,9 @@ public class GameManager : MonoBehaviour
 
             Debug.Log($"Match Found! ID: {cardA.CardID} | Matched Pairs: {_matchedPairs}/{_totalPairs}");
 
+            // Notify ScoreManager
+            ScoreManager.Instance.OnMatch();
+            
             // Check if game is over
             CheckGameOver();
         }
@@ -137,6 +143,8 @@ public class GameManager : MonoBehaviour
     {
         StopAllCoroutines();
 
+        ScoreManager.Instance.ResetScore();
+        
         // Regenerate grid
         GridManager.Instance.GenerateGrid(
             GridManager.Instance.TotalColumns,
