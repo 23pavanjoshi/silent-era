@@ -39,6 +39,16 @@ public class CardController : MonoBehaviour
     }
     
     /// <summary>
+    /// Instantly set matched on load without no animation
+    /// </summary>
+    public void SetMatchedInstant()
+    {
+        State = CardState.Matched;
+        frontFace.SetActive(true);
+        backFace.SetActive(false);
+    }
+    
+    /// <summary>
     /// setup this card
     /// </summary>
     public void Setup(int id, Sprite frontSprite)

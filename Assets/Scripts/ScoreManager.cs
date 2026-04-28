@@ -13,6 +13,10 @@ public class ScoreManager : MonoBehaviour
     private int _currentScore = 0;
     private int _highScore = 0;
 
+    public int CurrentScore => _currentScore;
+    public int TurnScore => _turnScore;
+    public int HighScore => _highScore;
+    
     private void Awake()
     {
         if (Instance == null)
@@ -96,5 +100,22 @@ public class ScoreManager : MonoBehaviour
         _highScore = PlayerPrefs.GetInt("HighScore", 0);
         OnHighScoreChanged?.Invoke(_highScore);
         Debug.Log($"High Score Loaded: {_highScore}");
+    }
+    
+    /// <summary>
+    /// Restore score from save data
+    /// </summary>
+    public void RestoreScore(int score, int turn, int savedHighScore)
+    {
+        _currentScore = score;
+        _turnScore    = turn;
+        _highScore    = Mathf.Max(savedHighScore, _highScore);
+
+        // Update UI
+        OnScoreChanged?.Invoke(_currentScore);
+        OnTurnChanged?.Invoke(_turnScore);
+        OnHighScoreChanged?.Invoke(_highScore);
+
+        Debug.Log($"Score Restored: {_currentScore} | Turns: {_turnScore}");
     }
 }

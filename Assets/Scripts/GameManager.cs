@@ -34,16 +34,66 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        InitGame();
+        if (SaveManager.Instance.HasSaveData)
+        {
+            Debug.Log("Save found! Loading...");
+            LoadSavedGame();
+        }
+        else
+        {
+            Debug.Log("No save! Fresh start...");
+            InitGame();
+        }
+    }
+    
+    private void LoadSavedGame()
+    {
+        SaveData data = SaveManager.Instance.LoadGame();
+
+        if (data == null)
+        {
+            InitGame();
+            return;
+        }
+
+        GridManager.Instance.LoadFromSave(data);
+    }
+
+    /// <summary>
+    /// Called by GridManager after load is complete
+    /// </summary>
+    public void OnGridLoaded(SaveData data)
+    {
+        // Restore score
+        ScoreManager.Instance.RestoreScore(
+            data.currentScore,
+            data.turnScore,
+            data.highScore
+        );
+
+        // Count matched pairs
+        _matchedPairs = 0;
+        foreach (CardSaveData card in data.cardStates)
+        {
+            if (card.cardState == "Matched")
+                _matchedPairs++;
+        }
+        _matchedPairs /= 2;
+        _totalPairs   = (data.totalColumns * data.totalRows) / 2;
+        CurrentState = GameState.Playing;
+
+        Debug.Log($"Loaded! Matched: {_matchedPairs}/{_totalPairs}");
     }
     
     public void InitGame()
     {
+        GridManager.Instance.InitGrid();
+        
         // Clear all records if restarted game
         _flippedCards.Clear();
         _matchedCards.Clear();
-        _matchedPairs  = 0;
-        CurrentState  = GameState.Playing;
+        _matchedPairs = 0;
+        CurrentState = GameState.Playing;
 
         // Get total pairs from GridManager
         int totalCards = GridManager.Instance.GetAllCards().Count;
@@ -111,6 +161,9 @@ public class GameManager : MonoBehaviour
             // Notify ScoreManager
             ScoreManager.Instance.OnMatch();
             
+            // Save after every match
+            SaveManager.Instance.SaveGame();
+            
             // Check if game is over
             CheckGameOver();
         }
@@ -132,6 +185,9 @@ public class GameManager : MonoBehaviour
         {
             CurrentState = GameState.GameOver;
 
+            // Delete save data once game completed
+            SaveManager.Instance.DeleteSave();
+            
             Debug.Log("Game Over! All Pairs Matched!");
         }
     }
@@ -143,6 +199,9 @@ public class GameManager : MonoBehaviour
     {
         StopAllCoroutines();
 
+        // Delete save data on restart
+        SaveManager.Instance.DeleteSave();
+        
         ScoreManager.Instance.ResetScore();
         
         // Regenerate grid

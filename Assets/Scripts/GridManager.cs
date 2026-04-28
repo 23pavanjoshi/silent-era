@@ -40,16 +40,11 @@ public class GridManager : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(InitGrid());
     }
 
-    private IEnumerator InitGrid()
+    public void InitGrid()
     {
-        // Wait for canvas to fully calculate layout
-        yield return new WaitForEndOfFrame();
-
         GenerateGrid(totalColumns, totalRows);
-        GameManager.Instance.InitGame();
     }
     
     /// <summary>
@@ -188,5 +183,53 @@ public class GridManager : MonoBehaviour
             Destroy(child.gameObject);
 
         allCards.Clear();
+    }
+    
+    /// <summary>
+    /// Restore grid from save data
+    /// </summary>
+    public void LoadFromSave(SaveData data)
+    {
+        ClearGrid();
+
+        totalColumns = data.totalColumns;
+        totalRows    = data.totalRows;
+
+        StartCoroutine(LoadGridCoroutine(data));
+    }
+
+    private IEnumerator LoadGridCoroutine(SaveData data)
+    {
+        yield return new WaitForEndOfFrame();
+
+        Vector2 cardSize         = CalculateCardSize(totalColumns, totalRows);
+        cardGrid.constraint      = GridLayoutGroup.Constraint.FixedColumnCount;
+        cardGrid.constraintCount = totalColumns;
+        cardGrid.cellSize        = cardSize;
+        cardGrid.spacing         = new Vector2(cardSpacing, cardSpacing);
+        cardGrid.childAlignment  = TextAnchor.MiddleCenter;
+        cardGrid.padding         = new RectOffset(10, 10, 10, 10);
+
+        foreach (CardSaveData cardData in data.cardStates)
+        {
+            GameObject     cardObj = Instantiate(cardPrefab, cardGrid.transform);
+            CardController card    = cardObj.GetComponent<CardController>();
+            Sprite         sprite  = GetSpriteForID(cardData.cardID);
+
+            card.Setup(cardData.cardID, sprite);
+
+            // Restore matched state instantly
+            if (cardData.cardState == "Matched")
+                card.SetMatchedInstant();
+
+            allCards.Add(card);
+        }
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(
+            cardGrid.GetComponent<RectTransform>()
+        );
+
+        // Tell GameManager grid is ready
+        GameManager.Instance.OnGridLoaded(data);
     }
 }
