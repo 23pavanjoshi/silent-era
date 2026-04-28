@@ -7,10 +7,7 @@ public class SaveManager : MonoBehaviour
 {
     public static SaveManager Instance { get; private set; }
 
-    private string SavePath => Path.Combine(
-        Application.persistentDataPath,
-        "gamesave.json"
-    );
+    private string SavePath => Path.Combine(Application.persistentDataPath, "gamesave.json");
 
     public bool HasSaveData { get; private set; } = false;
 
@@ -22,9 +19,6 @@ public class SaveManager : MonoBehaviour
             Destroy(gameObject);
 
         HasSaveData = File.Exists(SavePath);
-
-        Debug.Log($"Save Path: {SavePath}");
-        Debug.Log($"Has Save: {HasSaveData}");
     }
     
     public void SaveGame()
@@ -34,7 +28,7 @@ public class SaveManager : MonoBehaviour
             SaveData data = new SaveData();
             
             data.totalColumns = GridManager.Instance.TotalColumns;
-            data.totalRows    = GridManager.Instance.TotalRows;
+            data.totalRows = GridManager.Instance.TotalRows;
 
             data.currentScore = ScoreManager.Instance.CurrentScore;
             data.turnScore = ScoreManager.Instance.TurnScore;
@@ -47,7 +41,7 @@ public class SaveManager : MonoBehaviour
             {
                 data.cardStates.Add(new CardSaveData
                 {
-                    cardID    = allCards[i].CardID,
+                    cardID = allCards[i].CardID,
                     cardIndex = i,
                     cardState = allCards[i].State.ToString()
                 });
@@ -57,8 +51,6 @@ public class SaveManager : MonoBehaviour
             string json = JsonUtility.ToJson(data, prettyPrint: true);
             File.WriteAllText(SavePath, json);
             HasSaveData = true;
-
-            Debug.Log($"Game Saved!");
         }
         catch (Exception e)
         {
@@ -72,14 +64,12 @@ public class SaveManager : MonoBehaviour
         {
             if (!File.Exists(SavePath))
             {
-                Debug.Log("No save file found!");
                 return null;
             }
 
-            string   json = File.ReadAllText(SavePath);
+            string json = File.ReadAllText(SavePath);
             SaveData data = JsonUtility.FromJson<SaveData>(json);
 
-            Debug.Log("Game Loaded!");
             return data;
         }
         catch (Exception e)
@@ -97,7 +87,6 @@ public class SaveManager : MonoBehaviour
             {
                 File.Delete(SavePath);
                 HasSaveData = false;
-                Debug.Log("Save Deleted!");
             }
         }
         catch (Exception e)

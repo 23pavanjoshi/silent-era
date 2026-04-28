@@ -23,8 +23,6 @@ public class ScoreManager : MonoBehaviour
             Instance = this;
         else
             Destroy(gameObject);
-        
-        Debug.Log("ScoreManager Awake...");
     }
 
     private void Start()
@@ -39,9 +37,7 @@ public class ScoreManager : MonoBehaviour
     public void OnTurnTaken()
     {
         _turnScore += 1;
-
-        Debug.Log($"OnTurnTaken! -{_turnScore}");
-
+        
         // Fire events
         OnTurnChanged?.Invoke(_turnScore);
     }
@@ -56,9 +52,7 @@ public class ScoreManager : MonoBehaviour
         
         // Check High score
         CheckHighScore();
-
-        Debug.Log($"Match! Combo: | Score: {_currentScore}");
-
+        
         // Fire events
         OnScoreChanged?.Invoke(_currentScore);
     }
@@ -73,8 +67,6 @@ public class ScoreManager : MonoBehaviour
 
         OnTurnChanged?.Invoke(_turnScore);
         OnScoreChanged?.Invoke(_currentScore);
-
-        Debug.Log("Score Reset!");
     }
     
     private void CheckHighScore()
@@ -85,7 +77,6 @@ public class ScoreManager : MonoBehaviour
             _highScore = _currentScore;
             SaveHighScore();
             OnHighScoreChanged?.Invoke(_highScore);
-            Debug.Log($"New High Score: {_highScore}");
         }
     }
 
@@ -99,7 +90,6 @@ public class ScoreManager : MonoBehaviour
     {
         _highScore = PlayerPrefs.GetInt("HighScore", 0);
         OnHighScoreChanged?.Invoke(_highScore);
-        Debug.Log($"High Score Loaded: {_highScore}");
     }
     
     /// <summary>
@@ -108,14 +98,12 @@ public class ScoreManager : MonoBehaviour
     public void RestoreScore(int score, int turn, int savedHighScore)
     {
         _currentScore = score;
-        _turnScore    = turn;
-        _highScore    = Mathf.Max(savedHighScore, _highScore);
+        _turnScore = turn;
+        _highScore = Mathf.Max(savedHighScore, _highScore);
 
         // Update UI
         OnScoreChanged?.Invoke(_currentScore);
         OnTurnChanged?.Invoke(_turnScore);
         OnHighScoreChanged?.Invoke(_highScore);
-
-        Debug.Log($"Score Restored: {_currentScore} | Turns: {_turnScore}");
     }
 }

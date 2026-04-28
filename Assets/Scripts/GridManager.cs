@@ -6,10 +6,8 @@ using System.Collections.Generic;
 public class GridManager : MonoBehaviour
 {
     public static GridManager Instance { get; private set; }
-
     
     [Header("References")]
-    [SerializeField] private GameObject cardPrefab;
     [SerializeField] private GridLayoutGroup cardGrid;
     [SerializeField] private RectTransform gameBoardRect;
 
@@ -25,7 +23,6 @@ public class GridManager : MonoBehaviour
 
     [Header("Card Sprites")]
     [SerializeField] private List<Sprite> cardSprites;
-
     
     private List<CardController> allCards = new List<CardController>();
 
@@ -36,10 +33,6 @@ public class GridManager : MonoBehaviour
             Instance = this;
         else
             Destroy(gameObject);
-    }
-
-    private void Start()
-    {
     }
 
     public void UpdateGrid(int columns, int rows)
@@ -61,7 +54,6 @@ public class GridManager : MonoBehaviour
         int totalCards = columns * rows;
         if (totalCards % 2 != 0)
         {
-            Debug.LogWarning("Total cards must be even number for pairing!!!");
             return;
         }
 
@@ -70,18 +62,18 @@ public class GridManager : MonoBehaviour
 
         // Store grid settings row and col
         totalColumns = columns;
-        totalRows    = rows;
+        totalRows = rows;
 
         // Calculate correct card size
         Vector2 cardSize = CalculateCardSize(columns, rows);
 
         // Apply to Grid Layout Group
-        cardGrid.constraint      = GridLayoutGroup.Constraint.FixedColumnCount;
+        cardGrid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         cardGrid.constraintCount = columns;
-        cardGrid.cellSize        = cardSize;
-        cardGrid.spacing         = new Vector2(cardSpacing, cardSpacing);
-        cardGrid.childAlignment  = TextAnchor.MiddleCenter;
-        cardGrid.padding         = new RectOffset(10, 10, 10, 10);
+        cardGrid.cellSize = cardSize;
+        cardGrid.spacing = new Vector2(cardSpacing, cardSpacing);
+        cardGrid.childAlignment = TextAnchor.MiddleCenter;
+        cardGrid.padding = new RectOffset(10, 10, 10, 10);
 
         // Generate paired card IDs and shuffle
         List<int> cardIDs = GenerateCardIDs(totalCards);
@@ -89,7 +81,7 @@ public class GridManager : MonoBehaviour
         // Spawn cards
         for (int i = 0; i < totalCards; i++)
         {
-            GameObject cardObj = Instantiate(cardPrefab, cardGrid.transform);
+            GameObject cardObj = CardPoolManager.Instance.GetCard(cardGrid.transform);
             CardController card = cardObj.GetComponent<CardController>();
 
             // Get sprite for this card ID
@@ -119,7 +111,7 @@ public class GridManager : MonoBehaviour
     private Vector2 CalculateCardSize(int columns, int rows)
     {
         // Get available board size
-        float boardWidth  = gameBoardRect.rect.width;
+        float boardWidth = gameBoardRect.rect.width;
         float boardHeight = gameBoardRect.rect.height;
 
         // Subtract padding (10 on each side)
@@ -131,14 +123,12 @@ public class GridManager : MonoBehaviour
         float totalSpacingY = cardSpacing * (rows - 1);
 
         // Calculate available space per card
-        float cardWidth  = (boardWidth  - paddingX - totalSpacingX) / columns;
+        float cardWidth = (boardWidth  - paddingX - totalSpacingX) / columns;
         float cardHeight = (boardHeight - paddingY - totalSpacingY) / rows;
 
         // Use smaller value to keep cards square
         float cardSize = Mathf.Min(cardWidth, cardHeight);
-
-        Debug.Log($"Calculated Card Size: {cardSize} x {cardSize}");
-
+        
         return new Vector2(cardSize, cardSize);
     }
 
@@ -185,9 +175,7 @@ public class GridManager : MonoBehaviour
     /// </summary>
     private void ClearGrid()
     {
-        foreach (Transform child in cardGrid.transform)
-            Destroy(child.gameObject);
-
+        CardPoolManager.Instance.ReturnAll();
         allCards.Clear();
     }
     
@@ -199,7 +187,7 @@ public class GridManager : MonoBehaviour
         ClearGrid();
 
         totalColumns = data.totalColumns;
-        totalRows    = data.totalRows;
+        totalRows = data.totalRows;
 
         StartCoroutine(LoadGridCoroutine(data));
     }
@@ -208,19 +196,19 @@ public class GridManager : MonoBehaviour
     {
         yield return new WaitForEndOfFrame();
 
-        Vector2 cardSize         = CalculateCardSize(totalColumns, totalRows);
-        cardGrid.constraint      = GridLayoutGroup.Constraint.FixedColumnCount;
+        Vector2 cardSize = CalculateCardSize(totalColumns, totalRows);
+        cardGrid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         cardGrid.constraintCount = totalColumns;
-        cardGrid.cellSize        = cardSize;
-        cardGrid.spacing         = new Vector2(cardSpacing, cardSpacing);
-        cardGrid.childAlignment  = TextAnchor.MiddleCenter;
-        cardGrid.padding         = new RectOffset(10, 10, 10, 10);
+        cardGrid.cellSize = cardSize;
+        cardGrid.spacing = new Vector2(cardSpacing, cardSpacing);
+        cardGrid.childAlignment = TextAnchor.MiddleCenter;
+        cardGrid.padding = new RectOffset(10, 10, 10, 10);
 
         foreach (CardSaveData cardData in data.cardStates)
         {
-            GameObject     cardObj = Instantiate(cardPrefab, cardGrid.transform);
-            CardController card    = cardObj.GetComponent<CardController>();
-            Sprite         sprite  = GetSpriteForID(cardData.cardID);
+            GameObject cardObj = CardPoolManager.Instance.GetCard(cardGrid.transform);
+            CardController card = cardObj.GetComponent<CardController>();
+            Sprite sprite = GetSpriteForID(cardData.cardID);
 
             card.Setup(cardData.cardID, sprite);
 

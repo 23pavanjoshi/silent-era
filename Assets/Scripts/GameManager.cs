@@ -15,27 +15,30 @@ public class GameManager : MonoBehaviour
 
     public GameState CurrentState { get; private set; } = GameState.Playing;
 
-    private List<CardController> _flippedCards  = new List<CardController>();
-    private List<CardController> _matchedCards  = new List<CardController>();
+    private List<CardController> _flippedCards = new List<CardController>();
+    private List<CardController> _matchedCards = new List<CardController>();
     private int _totalPairs = 0;
     private int _matchedPairs = 0;
 
     [Header("Settings")]
     [SerializeField] private float flipBackDelay = 0.8f;
 
+    private WaitForSeconds _flipWait;
+    
     private void Awake()
     {
         if (Instance == null)
             Instance = this;
         else
             Destroy(gameObject);
+        
+        _flipWait = new WaitForSeconds(flipBackDelay);
     }
 
     private void Start()
     {
         if (SaveManager.Instance.HasSaveData)
         {
-            Debug.Log("Save found! Loading...");
             LoadSavedGame();
         }
     }
@@ -78,10 +81,8 @@ public class GameManager : MonoBehaviour
                 _matchedPairs++;
         }
         _matchedPairs /= 2;
-        _totalPairs   = (data.totalColumns * data.totalRows) / 2;
+        _totalPairs = (data.totalColumns * data.totalRows) / 2;
         CurrentState = GameState.Playing;
-
-        Debug.Log($"Loaded! Matched: {_matchedPairs}/{_totalPairs}");
     }
     
     public void InitGame()
@@ -97,8 +98,6 @@ public class GameManager : MonoBehaviour
         // Get total pairs from GridManager
         int totalCards = GridManager.Instance.GetAllCards().Count;
         _totalPairs = totalCards / 2;
-
-        Debug.Log($"Game Started! Total Pairs: {_totalPairs}");
     }
     
     /// <summary>
@@ -114,8 +113,6 @@ public class GameManager : MonoBehaviour
 
         // Add to flipped list
         _flippedCards.Add(card);
-
-        Debug.Log($"Card Flipped: ID {card.CardID} | Total Flipped: {_flippedCards.Count}");
 
         // Check match when 2 cards are flipped
         if (_flippedCards.Count == 2)
@@ -139,7 +136,7 @@ public class GameManager : MonoBehaviour
         _flippedCards.Clear();
 
         // Wait before checking
-        yield return new WaitForSeconds(flipBackDelay);
+        yield return _flipWait;
 
         // Notify ScoreManager
         ScoreManager.Instance.OnTurnTaken();
@@ -152,8 +149,6 @@ public class GameManager : MonoBehaviour
             _matchedCards.Add(cardA);
             _matchedCards.Add(cardB);
             _matchedPairs++;
-
-            Debug.Log($"Match Found! ID: {cardA.CardID} | Matched Pairs: {_matchedPairs}/{_totalPairs}");
 
             // Notify ScoreManager
             ScoreManager.Instance.OnMatch();
@@ -169,8 +164,6 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log($"Mismatch! Card {cardA.CardID} vs Card {cardB.CardID}");
-
             // Flip both cards back down
             cardA.FlipDown();
             cardB.FlipDown();
@@ -194,8 +187,6 @@ public class GameManager : MonoBehaviour
             
             // Show game over Screen
             UIManager.Instance.ShowGameOver();
-            
-            Debug.Log("Game Over! All Pairs Matched!");
         }
     }
 
@@ -218,8 +209,6 @@ public class GameManager : MonoBehaviour
         );
 
         InitGame();
-
-        Debug.Log("Game Restarted!");
     }
     
     /// <summary>
@@ -233,8 +222,6 @@ public class GameManager : MonoBehaviour
         SaveManager.Instance.DeleteSave();
         
         ScoreManager.Instance.ResetScore();
-
-        Debug.Log("Game Reset!");
     }
 
     public int GetMatchedPairs() => _matchedPairs;

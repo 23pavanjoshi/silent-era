@@ -61,13 +61,11 @@ public class AudioManager : MonoBehaviour
     {
         if (clip == null)
         {
-            Debug.LogWarning("AudioClip is missing!");
             return;
         }
 
         if (_audioSource == null)
         {
-            Debug.LogWarning("AudioSource is missing!");
             return;
         }
 

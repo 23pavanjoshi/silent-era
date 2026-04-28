@@ -39,14 +39,14 @@ public class HighScoreTextSetter : MonoBehaviour
     private IEnumerator PunchScale(Transform target)
     {
         Vector3 originalScale = Vector3.one;
-        Vector3 punchScale    = Vector3.one * 1.3f;
-        float   duration      = 0.15f;
-        float   elapsed       = 0f;
+        Vector3 punchScale = Vector3.one * 1.3f;
+        float duration = 0.15f;
+        float elapsed = 0f;
 
         // Scale up
         while (elapsed < duration)
         {
-            elapsed          += Time.deltaTime;
+            elapsed += Time.deltaTime;
             target.localScale = Vector3.Lerp(originalScale, punchScale, elapsed / duration);
             yield return null;
         }
@@ -56,7 +56,7 @@ public class HighScoreTextSetter : MonoBehaviour
         // Scale back down
         while (elapsed < duration)
         {
-            elapsed          += Time.deltaTime;
+            elapsed += Time.deltaTime;
             target.localScale = Vector3.Lerp(punchScale, originalScale, elapsed / duration);
             yield return null;
         }

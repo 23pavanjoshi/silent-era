@@ -38,7 +38,6 @@ public class UIManager : MonoBehaviour
         // restart button event handle
         if (restartButton != null)
             restartButton.onClick.AddListener(OnRestartClicked);
-
     }
     
     /// <summary>
@@ -46,7 +45,6 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void LoadSavedGame(SaveData data)
     {
-        Debug.Log("Load Saved game and start...");
         homePanel.SetActive(false);
         gamePanel.SetActive(true);
         GameManager.Instance.ResumeGameStart(data);
@@ -58,11 +56,8 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
-        Debug.Log("Fresh start...");
         // Get selected text from dropdown (4x4)
         string selectedValue = gridDropdown.options[gridDropdown.value].text;
-
-        Debug.Log($"Selected: {selectedValue}");
 
         // Split "4x4"
         string[] parts = selectedValue.Split('x');
@@ -70,8 +65,6 @@ public class UIManager : MonoBehaviour
         // Parse columns and rows
         int columns = int.Parse(parts[0]);
         int rows = int.Parse(parts[1]);
-
-        Debug.Log($"Columns: {columns} | Rows: {rows}");
         
         homePanel.SetActive(false);
         gamePanel.SetActive(true);
